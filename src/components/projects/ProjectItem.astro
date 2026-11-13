@@ -1,0 +1,304 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '@/components/ui/Icon.astro';
+import PendingTag from '@/components/ui/PendingTag.astro';
+import ProjectMockup from './ProjectMockup.astro';
+import type { Project } from '@/data/projects';
+
+interface Props {
+  project: Project;
+  index: number;
+  total: number;
+}
+
+const { project, index, total } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+const id = `proyecto-${index + 1}`;
+const side = index % 2 === 0 ? 'left' : 'right';
+
+// La imagen enlaza a la demo si existe; si no, al código. Es un atajo para
+// ratón: para teclado y lectores de pantalla ya están los enlaces de texto.
+const mediaHref = project.demo ?? project.repo;
+const MediaTag = mediaHref ? 'a' : 'div';
+const mediaAttrs = mediaHref
+  ? {
+      href: mediaHref,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      tabindex: -1,
+      'aria-hidden': 'true',
+      'data-cursor': project.demo ? 'Ver demo ↗' : 'Ver código ↗',
+    }
+  : {};
+---
+
+<li class="project" data-side={side}>
+  <article class="project__inner" aria-labelledby={`${id}-title`}>
+    <MediaTag class="project__media" {...mediaAttrs}>
+      <div class="project__frame" data-reveal="clip">
+        <div class="project__parallax">
+          <div class="project__zoom">
+            {
+              project.image ? (
+                <Image
+                  src={project.image}
+                  alt={mediaHref ? '' : (project.imageAlt ?? '')}
+                  widths={[640, 1024, 1600, 2000]}
+                  sizes="(min-width: 64rem) 62vw, 100vw"
+                  class="project__img"
+                />
+              ) : (
+                <ProjectMockup kind={project.mockup ?? 'web'} uid={id} />
+              )
+            }
+          </div>
+        </div>
+        {!project.image && <span class="project__caption mono">Captura pendiente · 16:10</span>}
+      </div>
+    </MediaTag>
+
+    <div class="project__body" data-reveal data-delay="1">
+      <p class="project__meta mono">
+        <span class="project__count">{pad(index + 1)} / {pad(total)}</span>
+        <span>{project.year}</span>
+        <span>{project.role}</span>
+      </p>
+
+      <h3 id={`${id}-title`} class="project__title">{project.title}</h3>
+      {project.placeholder && <PendingTag />}
+
+      <p class="project__summary">{project.summary}</p>
+
+      <ul class="project__tags" aria-label="Tecnologías">
+        {project.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+
+      <div class="project__links">
+        {
+          project.demo && (
+            <a class="link project__link" href={project.demo} target="_blank" rel="noopener noreferrer">
+              Demo
+              <Icon name="arrow-up-right" size={15} />
+              <span class="sr-only">de {project.title} (se abre en una pestaña nueva)</span>
+            </a>
+          )
+        }
+        {
+          project.repo && (
+            <a class="link project__link" href={project.repo} target="_blank" rel="noopener noreferrer">
+              Código en GitHub
+              <Icon name="arrow-up-right" size={15} />
+              <span class="sr-only">de {project.title} (se abre en una pestaña nueva)</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </article>
+</li>
+
+<style>
+  .project + .project {
+    margin-top: clamp(5rem, 3rem + 8vw, 11rem);
+  }
+
+  .project__inner {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 2rem;
+    align-items: end;
+  }
+
+  /* Composición asimétrica alterna */
+  .project[data-side='left'] .project__media {
+    grid-column: 1 / span 8;
+  }
+
+  .project[data-side='left'] .project__body {
+    grid-column: 9 / -1;
+  }
+
+  .project[data-side='right'] .project__media {
+    grid-column: 5 / -1;
+    grid-row: 1;
+  }
+
+  .project[data-side='right'] .project__body {
+    grid-column: 1 / span 4;
+    grid-row: 1;
+    align-self: start;
+    padding-top: clamp(2rem, 8vw, 7rem);
+  }
+
+  /* ── Media ───────────────────────────────────────────────── */
+  .project__media {
+    display: block;
+  }
+
+  .project__frame {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    background: var(--bg-elev);
+    outline: 1px solid var(--line);
+    outline-offset: -1px;
+  }
+
+  .project__parallax {
+    position: absolute;
+    inset: -7% 0;
+  }
+
+  .project__zoom {
+    width: 100%;
+    height: 100%;
+    transform: scale(1.08);
+    transition: transform 1400ms var(--ease-out);
+  }
+
+  /* Al revelarse, la imagen se asienta (acompaña a la máscara) */
+  :global(.is-visible) > .project__parallax > .project__zoom,
+  :global(html:not(.js)) .project__zoom {
+    transform: scale(1);
+  }
+
+  .project__zoom :global(.project__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project__media:hover :global(.is-visible) > .project__parallax > .project__zoom {
+      transform: scale(1.03);
+      transition-duration: 900ms;
+    }
+  }
+
+  /* Parallax sutil con scroll-driven animations (mejora progresiva, sin JS).
+   * Timeline en regla aparte: evita que el minificador lo fusione con el shorthand. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .project__parallax {
+        animation: parallax linear both;
+      }
+
+      .project__frame .project__parallax {
+        animation-timeline: view();
+        animation-range: cover;
+      }
+    }
+  }
+
+  @keyframes parallax {
+    from {
+      transform: translateY(-5%);
+    }
+    to {
+      transform: translateY(5%);
+    }
+  }
+
+  .project__caption {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--radius-pill);
+    background: rgb(14 14 12 / 0.7);
+    color: var(--fg-muted);
+    font-size: 0.625rem;
+  }
+
+  /* ── Texto ───────────────────────────────────────────────── */
+  .project__body {
+    display: grid;
+    justify-items: start;
+    gap: 1.25rem;
+  }
+
+  .project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    color: var(--fg-muted);
+  }
+
+  .project__count {
+    color: var(--accent);
+  }
+
+  .project__title {
+    font-size: var(--step-3);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
+
+  .project__summary {
+    color: var(--fg-muted);
+    max-width: 40ch;
+  }
+
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .project__tags li {
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--fg-muted);
+  }
+
+  .project__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+  }
+
+  .project__link {
+    min-height: 44px;
+    font-weight: 500;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 63.99rem) {
+    .project[data-side] .project__media,
+    .project[data-side] .project__body {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      padding-top: 0;
+    }
+
+    .project[data-side='right'] .project__media {
+      grid-column: 2 / -1;
+    }
+
+    .project[data-side='left'] .project__media {
+      grid-column: 1 / span 11;
+    }
+
+    .project[data-side='right'] .project__body {
+      grid-column: 2 / -1;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .project[data-side] .project__media,
+    .project[data-side] .project__body {
+      grid-column: 1 / -1;
+    }
+
+    .project__frame {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

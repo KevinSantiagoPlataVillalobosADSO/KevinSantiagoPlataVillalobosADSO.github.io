@@ -1,0 +1,113 @@
+---
+import Section from '@/components/layout/Section.astro';
+import SplitWords from '@/components/ui/SplitWords.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ProjectItem from '@/components/projects/ProjectItem.astro';
+import { projects } from '@/data/projects';
+import { profile } from '@/data/profile';
+
+const github = profile.socials.find((s) => s.label.toLowerCase() === 'github');
+---
+
+<Section id="proyectos" meta={`${projects.length} seleccionados`} class="projects">
+  <div class="projects__head">
+    <SplitWords text="Trabajo *seleccionado*" class="display" />
+    <p class="projects__intro" data-reveal>
+      Una selección de proyectos con contexto: qué problema resolvían, qué decisiones tomé y qué
+      tecnologías usé.
+    </p>
+  </div>
+
+  <ol class="projects__list">
+    {projects.map((project, i) => <ProjectItem project={project} index={i} total={projects.length} />)}
+  </ol>
+
+  {
+    github && (
+      <a class="projects__more" href={github.href} target="_blank" rel="noopener noreferrer" data-reveal>
+        <span class="projects__more-label">Más proyectos en GitHub</span>
+        <span class="projects__more-icon">
+          <Icon name="arrow-up-right" size={28} strokeWidth={1.25} />
+        </span>
+        <span class="sr-only">(se abre en una pestaña nueva)</span>
+      </a>
+    )
+  }
+</Section>
+
+<style>
+  .projects__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 1.5rem;
+    align-items: end;
+    margin-bottom: clamp(3.5rem, 2rem + 6vw, 8rem);
+  }
+
+  .projects__head :global(.display) {
+    grid-column: 1 / span 8;
+  }
+
+  .projects__intro {
+    grid-column: 9 / -1;
+    max-width: 34ch;
+    color: var(--fg-muted);
+  }
+
+  /* Enlace de cierre: una fila grande, no un botón más */
+  .projects__more {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: clamp(5rem, 3rem + 8vw, 10rem);
+    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border-block: 1px solid var(--line);
+    font-size: var(--step-3);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .projects__more-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: clamp(3rem, 2rem + 3vw, 4.5rem);
+    aspect-ratio: 1;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition:
+      background-color var(--dur-ui) ease,
+      color var(--dur-ui) ease,
+      border-color var(--dur-ui) ease,
+      transform var(--dur-hover) var(--ease-out);
+  }
+
+  .projects__more-label {
+    transition: color var(--dur-ui) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .projects__more:hover .projects__more-icon {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+      transform: rotate(45deg);
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .projects__head :global(.display),
+    .projects__intro {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .projects__more:hover .projects__more-icon {
+      transform: none;
+    }
+  }
+</style>

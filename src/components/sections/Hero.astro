@@ -1,0 +1,524 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { fullName, profile } from '@/data/profile';
+
+const year = new Date().getFullYear();
+const chars = Array.from(profile.firstName).map((c) => (c === ' ' ? ' ' : c));
+
+// El tamaño del nombre se ajusta a su longitud para que nunca desborde.
+const len = chars.length;
+const sizeBucket = len <= 5 ? 's' : len <= 7 ? 'm' : len <= 9 ? 'l' : 'xl';
+---
+
+<section id="inicio" class="hero" aria-labelledby="hero-title" data-hero>
+  <div class="hero__stage" aria-hidden="true">
+    <div class="hero__orb" data-hero-orb></div>
+    <canvas class="hero__canvas" data-hero-canvas></canvas>
+  </div>
+
+  <div class="hero__grid container">
+    <p class="hero__eyebrow mono">
+      <span>Portafolio</span>
+      <span class="hero__eyebrow-rule" aria-hidden="true"></span>
+      <span>{year}</span>
+    </p>
+
+    <h1 id="hero-title" class="hero__title" data-size={sizeBucket}>
+      <span class="sr-only">{fullName}</span>
+      <span class="hero__first" aria-hidden="true">
+        <span class="hero__mask">
+          {chars.map((c) => <span class="hero__char">{c}</span>)}
+        </span>
+      </span>
+      <span class="hero__last serif" aria-hidden="true">
+        <span class="hero__mask">
+          <span class="hero__last-inner">{profile.lastName}</span>
+        </span>
+      </span>
+    </h1>
+
+    <div class="hero__lede">
+      <p class="hero__role">
+        <span>{profile.role}</span>
+        <span class="hero__role-alt">/ {profile.roleSecondary}</span>
+      </p>
+      <p class="hero__intro">{profile.intro}</p>
+      <div class="hero__actions">
+        <Button href="#proyectos" label="Ver proyectos" icon="arrow-down" />
+        <Button href="#contacto" label="Contactar" variant="ghost" icon="arrow-up-right" />
+      </div>
+    </div>
+
+    <div class="hero__bar">
+      <ul class="hero__socials" aria-label="Redes sociales">
+        {
+          profile.socials.map((s) => (
+            <li>
+              <a class="link" href={s.href} target="_blank" rel="noopener noreferrer">
+                {s.label}
+                <Icon name="arrow-up-right" size={13} />
+                <span class="sr-only">(se abre en una pestaña nueva)</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="hero__location mono">
+        <Icon name="map-pin" size={13} />
+        {profile.location}
+      </p>
+      <a class="hero__scroll mono" href="#sobre-mi" aria-label="Desliza hasta Sobre mí">
+        <span>Desliza</span>
+        <span class="hero__scroll-track" aria-hidden="true">
+          <span class="hero__scroll-dot"></span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initHeroScene } from '@/scripts/hero/loader';
+  initHeroScene();
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  /* ── Escenario 3D ─────────────────────────────────────────── */
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .hero__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1600ms var(--ease-out);
+  }
+
+  .hero__canvas[data-ready] {
+    opacity: 1;
+  }
+
+  /* Ancla del núcleo: el CSS decide dónde y de qué tamaño; el script lo lee. */
+  .hero__orb {
+    position: absolute;
+    top: calc(var(--header-h) + 3svh);
+    left: 52%;
+    width: min(36vw, 58svh);
+    aspect-ratio: 1;
+  }
+
+  /* Luz ambiental detrás del núcleo (siempre visible, también sin WebGL) */
+  .hero__orb::before {
+    content: '';
+    position: absolute;
+    inset: -45%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      var(--accent-glow) 0%,
+      rgb(255 106 61 / 0.06) 32%,
+      transparent 62%
+    );
+  }
+
+  /* Fallback sin WebGL: trama de puntos enmascarada en círculo */
+  .hero__orb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(239 236 228 / 0.55) 0.8px, transparent 1.4px) 0 0 / 9px 9px;
+    -webkit-mask: radial-gradient(circle at 42% 40%, #000 0 30%, transparent 70%);
+    mask: radial-gradient(circle at 42% 40%, #000 0 30%, transparent 70%);
+    opacity: 0.7;
+    transition: opacity 1200ms var(--ease-out);
+  }
+
+  .hero__stage:has(.hero__canvas[data-ready]) .hero__orb::after {
+    opacity: 0;
+  }
+
+  /* ── Retícula ─────────────────────────────────────────────── */
+  .hero__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto 1fr auto auto;
+    column-gap: var(--gap);
+    min-height: 100svh;
+    padding-top: calc(var(--header-h) + clamp(1.25rem, 4svh, 3.5rem));
+    padding-bottom: clamp(1rem, 2.5svh, 1.75rem);
+  }
+
+  .hero__eyebrow {
+    grid-row: 1;
+    grid-column: 1 / span 6;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  .hero__eyebrow-rule {
+    width: 2.5rem;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .hero__lede {
+    grid-row: 2;
+    grid-column: 1 / span 5;
+    margin-top: clamp(1.5rem, 5svh, 3.5rem);
+  }
+
+  .hero__role {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    font-size: var(--step-1);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .hero__role-alt {
+    color: var(--fg-muted);
+  }
+
+  .hero__intro {
+    max-width: 36ch;
+    margin-top: 1rem;
+    color: var(--fg-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    margin-top: clamp(1.5rem, 3.5svh, 2.25rem);
+  }
+
+  /* ── Nombre ──────────────────────────────────────────────── */
+  .hero__title {
+    --name-vw: 19vw;
+    grid-row: 4;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.18em;
+    margin-top: 2rem;
+    font-size: clamp(3.25rem, min(var(--name-vw), 34svh), 18rem);
+    line-height: 0.84;
+    text-wrap: initial;
+  }
+
+  .hero__title[data-size='m'] {
+    --name-vw: 15vw;
+  }
+
+  .hero__title[data-size='l'] {
+    --name-vw: 12vw;
+  }
+
+  .hero__title[data-size='xl'] {
+    --name-vw: 9.5vw;
+  }
+
+  .hero__first {
+    font-weight: 600;
+    letter-spacing: -0.058em;
+    margin-left: -0.05em;
+  }
+
+  .hero__last {
+    font-size: 0.42em;
+    line-height: 1;
+    color: var(--fg-muted);
+  }
+
+  /* Máscara vertical: recorta la subida sin recortar la itálica ni el tracking */
+  .hero__mask {
+    display: inline-block;
+    overflow-x: visible;
+    overflow-y: clip;
+    padding-block: 0.1em 0.12em;
+    margin-block: -0.1em -0.12em;
+    white-space: nowrap;
+  }
+
+  .hero__char,
+  .hero__last-inner {
+    display: inline-block;
+  }
+
+  .hero__last-inner {
+    padding-right: 0.06em;
+  }
+
+  /* ── Barra inferior ──────────────────────────────────────── */
+  .hero__bar {
+    grid-row: 5;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    align-items: center;
+    margin-top: clamp(1.25rem, 3svh, 2rem);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .hero__socials {
+    grid-column: 1 / span 5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+  }
+
+  .hero__socials a {
+    min-height: 44px;
+  }
+
+  .hero__location {
+    grid-column: 6 / span 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg-muted);
+  }
+
+  .hero__scroll {
+    grid-column: 10 / -1;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    color: var(--fg-muted);
+    transition: color var(--dur-ui) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero__scroll:hover {
+      color: var(--fg);
+    }
+  }
+
+  .hero__scroll-track {
+    position: relative;
+    width: 1px;
+    height: 2.25rem;
+    overflow: hidden;
+    background: var(--line-strong);
+  }
+
+  /* Movimiento constante → curva lineal en el recorrido, pausa al final */
+  .hero__scroll-dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 40%;
+    background: var(--accent);
+    animation: scroll-hint 2.4s var(--ease-in-out) infinite;
+  }
+
+  @keyframes scroll-hint {
+    0% {
+      transform: translateY(-100%);
+    }
+    60%,
+    100% {
+      transform: translateY(260%);
+    }
+  }
+
+  /* ── Coreografía de entrada (una vez, al cargar) ─────────── *
+   * Orden: nombre letra a letra (45 ms) → apellido → contexto → acciones.
+   */
+  @keyframes rise {
+    from {
+      transform: translateY(108%);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .hero__char,
+  .hero__last-inner {
+    animation: rise 1100ms var(--ease-out) both;
+  }
+
+  .hero__char:nth-child(1) { animation-delay: 120ms; }
+  .hero__char:nth-child(2) { animation-delay: 165ms; }
+  .hero__char:nth-child(3) { animation-delay: 210ms; }
+  .hero__char:nth-child(4) { animation-delay: 255ms; }
+  .hero__char:nth-child(5) { animation-delay: 300ms; }
+  .hero__char:nth-child(6) { animation-delay: 345ms; }
+  .hero__char:nth-child(7) { animation-delay: 390ms; }
+  .hero__char:nth-child(8) { animation-delay: 435ms; }
+  .hero__char:nth-child(n + 9) { animation-delay: 480ms; }
+
+  .hero__last-inner {
+    animation-delay: 420ms;
+  }
+
+  .hero__eyebrow {
+    animation: fade-up 800ms var(--ease-out) 200ms both;
+  }
+
+  .hero__role {
+    animation: fade-up 800ms var(--ease-out) 480ms both;
+  }
+
+  .hero__intro {
+    animation: fade-up 800ms var(--ease-out) 540ms both;
+  }
+
+  .hero__actions {
+    animation: fade-up 800ms var(--ease-out) 600ms both;
+  }
+
+  .hero__bar {
+    animation: fade 1000ms var(--ease-out) 760ms both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__char,
+    .hero__last-inner,
+    .hero__eyebrow,
+    .hero__role,
+    .hero__intro,
+    .hero__actions {
+      animation: fade 500ms ease both;
+    }
+
+    .hero__scroll-dot {
+      animation: none;
+      transform: translateY(75%);
+    }
+  }
+
+  /* ── Tablet ──────────────────────────────────────────────── */
+  @media (min-width: 48rem) and (max-width: 63.99rem) {
+    .hero__lede {
+      grid-column: 1 / span 7;
+    }
+
+    .hero__orb {
+      left: 50%;
+      width: min(46vw, 50svh);
+    }
+
+    .hero__socials {
+      grid-column: 1 / span 6;
+    }
+
+    .hero__location {
+      grid-column: 7 / span 3;
+    }
+  }
+
+  /* ── Móvil: composición propia, no un escritorio encogido ── */
+  @media (max-width: 47.99rem) {
+    .hero__grid {
+      grid-template-rows: auto 1fr auto auto auto;
+      padding-top: calc(var(--header-h) + 0.75rem);
+    }
+
+    .hero__orb {
+      top: calc(var(--header-h) + 1svh);
+      left: 26vw;
+      width: 62vw;
+    }
+
+    .hero__title {
+      --name-vw: 29vw;
+      grid-row: 3;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 1.5rem;
+    }
+
+    .hero__title[data-size='m'] {
+      --name-vw: 22vw;
+    }
+
+    .hero__title[data-size='l'] {
+      --name-vw: 17.5vw;
+    }
+
+    .hero__title[data-size='xl'] {
+      --name-vw: 13.5vw;
+    }
+
+    .hero__last {
+      font-size: 0.5em;
+      margin-top: 0.06em;
+    }
+
+    .hero__lede {
+      grid-row: 4;
+      grid-column: 1 / -1;
+      margin-top: 1.5rem;
+    }
+
+    .hero__role {
+      font-size: var(--step-0);
+    }
+
+    .hero__intro {
+      font-size: 0.9375rem;
+      margin-top: 0.625rem;
+    }
+
+    .hero__actions {
+      margin-top: 1.25rem;
+    }
+
+    .hero__actions :global(.btn) {
+      flex: 1 1 9rem;
+    }
+
+    .hero__bar {
+      grid-row: 5;
+      margin-top: 1.25rem;
+      padding-top: 0.25rem;
+    }
+
+    .hero__socials {
+      grid-column: 1 / -1;
+      justify-content: space-between;
+    }
+
+    .hero__location,
+    .hero__scroll {
+      display: none;
+    }
+  }
+</style>

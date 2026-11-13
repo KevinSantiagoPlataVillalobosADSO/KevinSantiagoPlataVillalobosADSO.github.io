@@ -1,0 +1,45 @@
+---
+/**
+ * Divide un texto en palabras para animarlas con máscara.
+ * Convención: *texto* se renderiza en serif itálica.
+ *
+ * mode="reveal" → las palabras suben al entrar en pantalla (una vez).
+ * mode="light"  → las palabras se iluminan según el scroll (ver scripts/word-light.ts).
+ */
+interface Props {
+  text: string;
+  as?: 'p' | 'h1' | 'h2' | 'h3' | 'span';
+  mode?: 'reveal' | 'light' | 'none';
+  class?: string;
+  id?: string;
+}
+
+const { text, as: Tag = 'p', mode = 'reveal', class: className, id } = Astro.props;
+
+const words = text
+  .split('*')
+  .flatMap((segment, i) =>
+    segment
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => ({ word, em: i % 2 === 1 })),
+  );
+---
+
+<Tag
+  id={id}
+  class:list={['split', className]}
+  data-reveal={mode === 'reveal' ? 'words' : undefined}
+  data-word-light={mode === 'light' ? '' : undefined}
+>
+  {
+    words.map(({ word, em }, i) => (
+      <>
+        <span class:list={['w', { 'w--em': em }]}>
+          <span>{word}</span>
+        </span>
+        {i < words.length - 1 && ' '}
+      </>
+    ))
+  }
+</Tag>

@@ -1,0 +1,9 @@
+# Texto con fin de línea LF en el repo; binarios sin conversión.
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.woff2 binary

@@ -1,0 +1,47 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import { fullName } from '@/data/profile';
+import { withBase } from '@/lib/url';
+---
+
+<BaseLayout title={`Página no encontrada — ${fullName}`} noindex home={false}>
+  <section class="not-found container" aria-labelledby="nf-title">
+    <p class="mono not-found__code" aria-hidden="true">Error 404</p>
+    <h1 id="nf-title" class="not-found__title">
+      Esta ruta <span class="serif">no existe.</span>
+    </h1>
+    <p class="not-found__text">
+      Puede que el enlace esté mal escrito o que la página se haya movido.
+    </p>
+    <Button href={withBase()} label="Volver al inicio" icon="arrow-up-right" />
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 1.5rem;
+    min-height: 100svh;
+    padding-block: calc(var(--header-h) + 3rem) 4rem;
+  }
+
+  .not-found__code {
+    color: var(--accent);
+  }
+
+  .not-found__title {
+    max-width: 14ch;
+    font-size: var(--step-4);
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+
+  .not-found__text {
+    max-width: 40ch;
+    color: var(--fg-muted);
+  }
+</style>

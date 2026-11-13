@@ -1,0 +1,263 @@
+---
+import Section from '@/components/layout/Section.astro';
+import SplitWords from '@/components/ui/SplitWords.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { profile } from '@/data/profile';
+import { withBase } from '@/lib/url';
+---
+
+<Section id="contacto" meta="Hablemos" class="contact">
+  <SplitWords text="¿Construimos algo *juntos?*" class="display contact__title" />
+
+  <div class="contact__mail" data-reveal>
+    <a class="contact__email" href={`mailto:${profile.email}`}>{profile.email}</a>
+    <button class="copy mono" type="button" data-copy={profile.email} data-state="idle">
+      <span class="copy__state copy__state--idle">
+        <Icon name="copy" size={15} />
+        Copiar correo
+      </span>
+      <span class="copy__state copy__state--done" aria-hidden="true">
+        <Icon name="check" size={15} />
+        Copiado
+      </span>
+    </button>
+    <p class="sr-only" aria-live="polite" data-copy-status></p>
+  </div>
+
+  <div class="contact__grid">
+    <p class="contact__note" data-reveal>{profile.contactNote}</p>
+
+    <ul class="contact__links" data-reveal data-delay="1">
+      {
+        profile.socials.map((s) => (
+          <li>
+            <a class="row" href={s.href} target="_blank" rel="noopener noreferrer">
+              <span class="row__label">{s.label}</span>
+              <span class="row__meta mono">{s.handle}</span>
+              <span class="row__icon">
+                <Icon name="arrow-up-right" size={18} />
+              </span>
+              <span class="sr-only">(se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a class="row" href={withBase(profile.cvFile)} download>
+          <span class="row__label">Currículum</span>
+          <span class="row__meta mono">PDF</span>
+          <span class="row__icon row__icon--down">
+            <Icon name="download" size={18} />
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</Section>
+
+<script>
+  import { initCopy } from '@/scripts/copy';
+  initCopy();
+</script>
+
+<style>
+  .contact {
+    overflow: clip;
+  }
+
+  /* Luz cálida que sube desde el pie: cierre de la página */
+  .contact::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -40%;
+    width: min(1400px, 140vw);
+    aspect-ratio: 2 / 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, var(--accent-glow), transparent);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .contact :global(.contact__title) {
+    max-width: 12ch;
+    font-size: clamp(3rem, 1.4rem + 7vw, 9.5rem);
+  }
+
+  .contact__mail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .contact__email {
+    font-size: clamp(1.375rem, 0.9rem + 2.4vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    padding-bottom: 0.1em;
+    transition: color var(--dur-ui) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .contact__email:hover {
+      color: var(--accent);
+    }
+  }
+
+  /* ── Botón copiar: transición (no keyframes), se puede pulsar seguido ── */
+  .copy {
+    position: relative;
+    display: inline-grid;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    color: var(--fg);
+    transition:
+      transform var(--dur-press) var(--ease-out),
+      border-color var(--dur-ui) ease;
+  }
+
+  .copy:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .copy:hover {
+      border-color: var(--fg-muted);
+    }
+  }
+
+  .copy__state {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition:
+      opacity var(--dur-ui) var(--ease-out),
+      transform var(--dur-ui) var(--ease-out);
+  }
+
+  .copy__state--done {
+    color: var(--accent);
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .copy[data-state='done'] .copy__state--idle {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  .copy[data-state='done'] .copy__state--done {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── Enlaces ─────────────────────────────────────────────── */
+  .contact__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 2.5rem;
+    margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+  }
+
+  .contact__note {
+    grid-column: 1 / span 4;
+    max-width: 30ch;
+    color: var(--fg-muted);
+  }
+
+  .contact__links {
+    grid-column: 6 / -1;
+    border-top: 1px solid var(--line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 44px;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row__label {
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .row__meta {
+    color: var(--fg-muted);
+  }
+
+  .row__icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition:
+      background-color var(--dur-ui) ease,
+      border-color var(--dur-ui) ease,
+      color var(--dur-ui) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .row:hover .row__label {
+      transform: translateX(0.5rem);
+    }
+
+    .row:hover .row__icon {
+      background: var(--fg);
+      border-color: var(--fg);
+      color: var(--bg);
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .contact__note,
+    .contact__links {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .row {
+      gap: 1rem;
+    }
+
+    .row__meta {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .copy__state,
+    .copy[data-state='done'] .copy__state--idle,
+    .copy__state--done {
+      transform: none;
+    }
+
+    .row:hover .row__label {
+      transform: none;
+    }
+  }
+</style>

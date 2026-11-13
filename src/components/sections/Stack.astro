@@ -1,0 +1,260 @@
+---
+import Section from '@/components/layout/Section.astro';
+import SplitWords from '@/components/ui/SplitWords.astro';
+import TechLogo from '@/components/ui/TechLogo.astro';
+import { levelLabels, stack, techCount, type TechLevel } from '@/data/stack';
+
+const usedLevels = [
+  ...new Set(stack.flatMap((g) => g.items.map((t) => t.level)).filter(Boolean)),
+] as TechLevel[];
+---
+
+<Section id="stack" meta={`${techCount} tecnologías`} class="stack">
+  <div class="stack__head">
+    <SplitWords text="Herramientas de *trabajo*" class="display stack__title" />
+    <div class="stack__aside" data-reveal>
+      <p class="stack__intro">
+        Lo que uso para construir, del navegador a la base de datos. Ordenado por capa, no por
+        moda.
+      </p>
+      {
+        usedLevels.length > 0 && (
+          <ul class="stack__legend mono" aria-label="Leyenda">
+            {usedLevels.map((level) => (
+              <li>
+                <span class="level" data-level={level} aria-hidden="true" />
+                {levelLabels[level]}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+
+  <ol class="stack__groups">
+    {
+      stack.map((group, gi) => (
+        <li class="group" data-reveal>
+          <div class="group__head">
+            <span class="group__index mono" aria-hidden="true">
+              {String(gi + 1).padStart(2, '0')}
+            </span>
+            <h3 class="group__title serif">
+              {group.title}
+              <sup class="group__count mono">{group.items.length}</sup>
+            </h3>
+            <p class="group__desc">{group.description}</p>
+          </div>
+
+          <ul class="group__items">
+            {group.items.map((tech) => (
+              <li class="tech">
+                <TechLogo tech={tech} class="tech__logo" />
+                <span class="tech__name">{tech.name}</span>
+                {tech.level && (
+                  <span class="level" data-level={tech.level} title={levelLabels[tech.level]}>
+                    <span class="sr-only">({levelLabels[tech.level]})</span>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ol>
+</Section>
+
+<style>
+  .stack__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 2rem;
+    align-items: end;
+    margin-bottom: clamp(3rem, 2rem + 4vw, 6rem);
+  }
+
+  .stack :global(.stack__title) {
+    grid-column: 1 / span 7;
+  }
+
+  .stack__aside {
+    grid-column: 9 / -1;
+  }
+
+  .stack__intro {
+    color: var(--fg-muted);
+    max-width: 34ch;
+  }
+
+  .stack__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1.25rem;
+    color: var(--fg-muted);
+  }
+
+  .stack__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Indicador de nivel: lleno / medio / vacío — la forma lo distingue, no solo el color */
+  .level {
+    display: inline-block;
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .level[data-level='frequent'] {
+    background: var(--accent);
+  }
+
+  .level[data-level='intermediate'] {
+    border: 1px solid var(--fg-muted);
+    background: linear-gradient(90deg, var(--fg-muted) 50%, transparent 50%);
+  }
+
+  .level[data-level='learning'] {
+    border: 1px solid var(--fg-muted);
+  }
+
+  /* ── Filas por categoría ─────────────────────────────────── */
+  .stack__groups {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .group {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 1.5rem;
+    padding-block: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Filete de acento que recorre la fila al pasar el ratón */
+  .group::before {
+    content: '';
+    position: absolute;
+    inset: -1px 0 auto 0;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover::before {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  .group__head {
+    grid-column: 1 / span 4;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-content: start;
+  }
+
+  .group__index {
+    padding-top: 0.6em;
+    color: var(--fg-faint);
+  }
+
+  .group__title {
+    font-size: var(--step-3);
+    line-height: 1;
+  }
+
+  .group__count {
+    margin-left: 0.35em;
+    vertical-align: super;
+    font-size: 0.6875rem;
+    font-style: normal;
+    color: var(--fg-muted);
+  }
+
+  .group__desc {
+    grid-column: 2;
+    margin-top: 0.75rem;
+    max-width: 28ch;
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .group__items {
+    grid-column: 6 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 0.75rem clamp(1.5rem, 1rem + 2vw, 3rem);
+    padding-top: 0.35rem;
+  }
+
+  .tech {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .tech :global(.tech__logo) {
+    color: var(--fg-muted);
+    transition: color var(--dur-ui) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tech:hover :global(.tech__logo) {
+      color: var(--accent);
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .stack :global(.stack__title) {
+      grid-column: 1 / -1;
+    }
+
+    .stack__aside {
+      grid-column: 1 / span 9;
+    }
+
+    .group__head {
+      grid-column: 1 / -1;
+    }
+
+    .group__items {
+      grid-column: 1 / -1;
+      padding-left: 3.25rem;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .stack__aside {
+      grid-column: 1 / -1;
+    }
+
+    .group__items {
+      padding-left: 0;
+      gap: 0.6rem 1.5rem;
+    }
+
+    .tech {
+      font-size: var(--step-1);
+      gap: 0.6rem;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+/**
+ * Envoltorio de sección: filete superior + índice + título semántico (h2).
+ * El titular grande de cada sección va en el slot como texto de apoyo visual.
+ */
+import { sectionIndex, sections, type SectionId } from '@/data/navigation';
+
+interface Props {
+  id: SectionId;
+  meta?: string;
+  class?: string;
+}
+
+const { id, meta, class: className } = Astro.props;
+const label = sections.find((s) => s.id === id)?.label ?? id;
+const index = sectionIndex(id);
+---
+
+<section id={id} class:list={['section', className]} aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <div class="section__eyebrow">
+      <span class="section__rule" data-reveal="line" aria-hidden="true"></span>
+      <span class="mono section__index" aria-hidden="true">({index})</span>
+      <h2 id={`${id}-title`} class="mono section__label">{label}</h2>
+      {meta && <span class="mono section__meta">{meta}</span>}
+    </div>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    position: relative;
+    padding-block: var(--section-y);
+  }
+
+  .section__eyebrow {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    align-items: baseline;
+    padding-top: 1.125rem;
+    margin-bottom: clamp(3rem, 2rem + 5vw, 6.5rem);
+    color: var(--fg-muted);
+  }
+
+  .section__rule {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .section__index {
+    grid-column: 1 / span 2;
+  }
+
+  .section__label {
+    grid-column: 3 / span 6;
+    color: var(--fg);
+  }
+
+  .section__meta {
+    grid-column: 9 / -1;
+    justify-self: end;
+    text-align: right;
+  }
+
+  @media (max-width: 47.99rem) {
+    .section__index {
+      grid-column: 1 / span 3;
+    }
+
+    .section__label {
+      grid-column: 4 / span 5;
+    }
+
+    .section__meta {
+      grid-column: 9 / -1;
+    }
+  }
+</style>

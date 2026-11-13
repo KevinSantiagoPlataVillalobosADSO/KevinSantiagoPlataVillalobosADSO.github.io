@@ -1,0 +1,292 @@
+---
+import Section from '@/components/layout/Section.astro';
+import SplitWords from '@/components/ui/SplitWords.astro';
+import PendingTag from '@/components/ui/PendingTag.astro';
+import Button from '@/components/ui/Button.astro';
+import { kindLabels, timeline } from '@/data/experience';
+import { profile } from '@/data/profile';
+import { withBase } from '@/lib/url';
+
+const kinds = [...new Set(timeline.map((e) => e.kind))];
+---
+
+<Section id="trayectoria" meta="Experiencia y formación" class="experience">
+  <div class="experience__grid">
+    <div class="experience__intro">
+      <div class="experience__sticky">
+        <SplitWords text="Camino *recorrido*" class="display" />
+        <p class="experience__lede" data-reveal>
+          Dónde he trabajado, qué he estudiado y cómo he ido creciendo como desarrollador.
+        </p>
+        <ul class="experience__legend mono" data-reveal>
+          {
+            kinds.map((kind) => (
+              <li>
+                <span class="marker" data-kind={kind} aria-hidden="true" />
+                {kindLabels[kind]}
+              </li>
+            ))
+          }
+        </ul>
+        <div data-reveal>
+          <Button href={withBase(profile.cvFile)} label="Descargar CV" variant="ghost" icon="download" download />
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <span class="timeline__track" aria-hidden="true">
+        <span class="timeline__progress"></span>
+      </span>
+      <ol>
+      {
+        timeline.map((entry) => (
+          <li class="entry" data-kind={entry.kind} data-reveal>
+            <span class="entry__marker marker" data-kind={entry.kind} aria-hidden="true" />
+            <div class="entry__period mono">
+              <span>{entry.period}</span>
+              {entry.current && <span class="entry__now">Ahora</span>}
+            </div>
+            <div class="entry__body">
+              <p class="entry__kind mono">{kindLabels[entry.kind]}</p>
+              <h3 class="entry__title">{entry.title}</h3>
+              <p class="entry__org">
+                <span class="serif">{entry.org}</span>
+                {entry.location && <span class="entry__location"> · {entry.location}</span>}
+              </p>
+              <p class="entry__summary">{entry.summary}</p>
+              {entry.tags && entry.tags.length > 0 && (
+                <ul class="entry__tags" aria-label="Tecnologías">
+                  {entry.tags.map((tag) => (
+                    <li>{tag}</li>
+                  ))}
+                </ul>
+              )}
+              {entry.placeholder && <PendingTag />}
+            </div>
+          </li>
+        ))
+      }
+      </ol>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .experience__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 3.5rem;
+  }
+
+  .experience__intro {
+    grid-column: 1 / span 4;
+  }
+
+  .experience__sticky {
+    position: sticky;
+    top: calc(var(--header-h) + 2.5rem);
+    display: grid;
+    justify-items: start;
+    gap: 1.75rem;
+  }
+
+  .experience__lede {
+    max-width: 30ch;
+    color: var(--fg-muted);
+  }
+
+  .experience__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    color: var(--fg-muted);
+  }
+
+  .experience__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  /* Marcador: forma distinta por tipo (no solo color) */
+  .marker {
+    display: inline-block;
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .marker[data-kind='education'] {
+    background: var(--bg);
+    border: 1.5px solid var(--fg-muted);
+    border-radius: 2px;
+    transform: rotate(45deg) scale(0.9);
+  }
+
+  /* ── Línea de tiempo ─────────────────────────────────────── */
+  .timeline {
+    --rail: 0.3125rem;
+    position: relative;
+    grid-column: 6 / -1;
+  }
+
+  .timeline__track {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: var(--rail);
+    width: 1px;
+    background: var(--line-strong);
+  }
+
+  .timeline__progress {
+    position: absolute;
+    inset: 0 -0.5px;
+    background: var(--accent);
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+
+  /* El progreso se dibuja con el scroll (scroll-driven, sin JS).
+   * El timeline va en otra regla a propósito: si comparte regla con el shorthand
+   * `animation`, el minificador los fusiona en una forma que Chrome descarta. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .timeline__progress {
+        animation: draw linear both;
+      }
+
+      /* De "inicio de la lista en el centro de la pantalla" a "final en el centro" */
+      .timeline .timeline__progress {
+        animation-timeline: view();
+        animation-range: cover 50vh cover calc(100% - 50vh);
+      }
+    }
+  }
+
+  @keyframes draw {
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    .timeline__progress {
+      transform: scaleY(1);
+      opacity: 0.5;
+    }
+  }
+
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(8rem, 3fr) minmax(0, 7fr);
+    column-gap: var(--gap);
+    row-gap: 0.75rem;
+    padding-left: 2.75rem;
+    padding-bottom: clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .entry:last-child {
+    padding-bottom: 0;
+  }
+
+  .entry__marker {
+    position: absolute;
+    left: 0;
+    top: 0.3rem;
+  }
+
+  .entry__period {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding-top: 0.2rem;
+    color: var(--fg-muted);
+  }
+
+  .entry__now {
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.625rem;
+  }
+
+  .entry__body {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+  }
+
+  .entry__kind {
+    color: var(--fg-faint);
+  }
+
+  .entry__title {
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  .entry__org {
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .entry__location {
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .entry__summary {
+    max-width: 52ch;
+    color: var(--fg-muted);
+  }
+
+  .entry__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--fg-muted);
+  }
+
+  .entry__tags li::before {
+    content: '#';
+    margin-right: 0.15em;
+    color: var(--fg-faint);
+  }
+
+  @media (max-width: 63.99rem) {
+    .experience__intro,
+    .timeline {
+      grid-column: 1 / -1;
+    }
+
+    .experience__sticky {
+      position: relative;
+      top: 0;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .entry {
+      grid-template-columns: minmax(0, 1fr);
+      padding-left: 2rem;
+    }
+
+    .entry__period {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+</style>

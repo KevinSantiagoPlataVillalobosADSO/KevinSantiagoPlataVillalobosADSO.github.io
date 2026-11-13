@@ -1,0 +1,33 @@
+---
+import { svgInner, uiIcons, type IconName } from '@/lib/icons';
+
+interface Props {
+  name: IconName;
+  size?: number;
+  strokeWidth?: number;
+  class?: string;
+  /** Si se pasa, el icono se anuncia; si no, es decorativo. */
+  label?: string;
+}
+
+const { name, size = 18, strokeWidth = 1.5, class: className, label } = Astro.props;
+const inner = svgInner(uiIcons[name]);
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class:list={['icon', className]}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  set:html={inner}
+/>

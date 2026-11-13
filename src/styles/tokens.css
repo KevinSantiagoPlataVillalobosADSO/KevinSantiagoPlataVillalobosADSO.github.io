@@ -1,0 +1,64 @@
+/* ─────────────────────────────────────────────────────────────
+   Tokens de diseño — fuente única de verdad para color, tipo,
+   espacio y movimiento. Los componentes nunca usan valores crudos.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: dark;
+
+  /* Superficies — grafito cálido, nunca negro puro */
+  --bg: #0e0e0c;
+  --bg-elev: #141412;
+  --bg-elev-2: #1b1b18;
+  --line: rgb(239 236 228 / 0.09);
+  --line-strong: rgb(239 236 228 / 0.18);
+
+  /* Texto (contraste sobre --bg: fg 16.9:1 · muted 6.7:1 · faint 3.1:1 solo decorativo) */
+  --fg: #efece4;
+  --fg-muted: #9b988e;
+  --fg-faint: #67645c;
+
+  /* Acento único: brasa. Contraste 6.9:1 sobre --bg */
+  --accent: #ff6a3d;
+  --accent-ink: #1a0b05;
+  --accent-soft: rgb(255 106 61 / 0.12);
+  --accent-glow: rgb(255 106 61 / 0.2);
+
+  /* Familias (las variables --font-* las genera Astro Fonts) */
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument);
+
+  /* Escala tipográfica fluida */
+  --step--2: 0.75rem;
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.1875rem, 1.08rem + 0.5vw, 1.4375rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  --step-3: clamp(2rem, 1.5rem + 2.4vw, 3.5rem);
+  --step-4: clamp(2.5rem, 1.5rem + 4.6vw, 6rem);
+  --step-display: clamp(4.5rem, min(19vw, 34svh), 18rem);
+
+  /* Espacio y retícula */
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
+  --gap: clamp(1rem, 0.6rem + 1.6vw, 2rem);
+  --section-y: clamp(6rem, 3rem + 10vw, 11rem);
+  --max-w: 1480px;
+  --header-h: 4.25rem;
+
+  --radius-s: 4px;
+  --radius-m: 10px;
+  --radius-pill: 999px;
+
+  /* Movimiento — curvas de la skill `animate` (no inventar otras) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 160ms;
+  --dur-ui: 220ms;
+  --dur-hover: 340ms;
+  --dur-reveal: 1000ms;
+
+  /* Capas */
+  --z-header: 50;
+  --z-cursor: 60;
+}

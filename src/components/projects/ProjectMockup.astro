@@ -1,0 +1,281 @@
+---
+/**
+ * Maqueta abstracta para proyectos sin captura. Se ve como "pantalla
+ * pendiente", no como contenido real: solo bloques, sin textos inventados.
+ * Usa los tokens de color vía clases (sin estilos inline: CSP estricta).
+ */
+import type { MockupKind } from '@/data/projects';
+
+interface Props {
+  kind: MockupKind;
+  uid: string;
+}
+
+const { kind, uid } = Astro.props;
+
+const chart = [640, 612, 624, 584, 598, 552, 566, 518, 534, 492, 506, 470];
+const chartX = (i: number) => 450 + i * 84;
+const linePath = chart.map((y, i) => `${i ? 'L' : 'M'}${chartX(i)} ${y}`).join(' ');
+const areaPath = `${linePath} L${chartX(chart.length - 1)} 700 L${chartX(0)} 700 Z`;
+
+// Líneas de código: [indentación, [ancho, clase][]]
+const code: [number, [number, string][]][] = [
+  [0, [[70, 'fa'], [180, 'f1'], [40, 'f3']]],
+  [0, [[70, 'fa'], [120, 'f1'], [200, 'f2']]],
+  [0, []],
+  [0, [[110, 'fa'], [160, 'f1'], [24, 'f3']]],
+  [1, [[60, 'f2'], [220, 'f1']]],
+  [1, [[90, 'fa'], [140, 'f2'], [60, 'f3']]],
+  [2, [[180, 'f1'], [100, 'fa']]],
+  [2, [[240, 'f2']]],
+  [1, [[30, 'f3']]],
+  [1, [[70, 'fa'], [260, 'f1'], [80, 'f2']]],
+  [0, [[24, 'f3']]],
+  [0, []],
+  [0, [[150, 'f3'], [320, 'f3']]],
+];
+---
+
+<svg
+  class="mockup"
+  viewBox="0 0 1600 1000"
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <radialGradient id={`${uid}-glow`} cx="0.75" cy="0.15" r="0.8">
+      <stop offset="0" class="stop-accent" stop-opacity="0.3"></stop>
+      <stop offset="1" class="stop-accent" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id={`${uid}-area`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="stop-accent" stop-opacity="0.32"></stop>
+      <stop offset="1" class="stop-accent" stop-opacity="0"></stop>
+    </linearGradient>
+    <radialGradient id={`${uid}-orb`} cx="0.38" cy="0.35" r="0.7">
+      <stop offset="0" class="stop-accent" stop-opacity="0.9"></stop>
+      <stop offset="0.55" class="stop-accent" stop-opacity="0.18"></stop>
+      <stop offset="1" class="stop-accent" stop-opacity="0"></stop>
+    </radialGradient>
+    <pattern id={`${uid}-grid`} width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" class="grid-line"></path>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="1000" class="bg"></rect>
+  <rect width="1600" height="1000" fill={`url(#${uid}-grid)`}></rect>
+  <rect width="1600" height="1000" fill={`url(#${uid}-glow)`}></rect>
+
+  {
+    (kind === 'dashboard' || kind === 'web' || kind === 'code') && (
+      <g>
+        <rect x="140" y="120" width="1320" height="760" rx="14" class="win" />
+        <path d="M140 172H1460" class="stroke" />
+        <circle cx="176" cy="146" r="6" class="f3" />
+        <circle cx="198" cy="146" r="6" class="f3" />
+        <circle cx="220" cy="146" r="6" class="f3" />
+        <rect x="600" y="137" width="400" height="18" rx="9" class="f4" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'dashboard' && (
+      <g>
+        <rect x="141" y="173" width="229" height="706" class="f5" />
+        <path d="M370 172V880" class="stroke" />
+        <rect x="172" y="204" width="28" height="28" rx="8" class="fa" />
+        <rect x="212" y="213" width="92" height="11" rx="5.5" class="f2" />
+        {[120, 96, 132, 88, 110, 100].map((w, i) => (
+          <rect x="172" y={270 + i * 46} width={w} height="11" rx="5.5" class={i === 1 ? 'fa' : 'f3'} />
+        ))}
+
+        <rect x="410" y="208" width="280" height="24" rx="6" class="f1" />
+        <rect x="410" y="246" width="180" height="11" rx="5.5" class="f3" />
+        <rect x="1270" y="206" width="150" height="40" rx="20" class="fa" />
+
+        {[0, 1, 2].map((i) => (
+          <g>
+            <rect x={410 + i * 345} y="290" width="320" height="130" rx="10" class="card" />
+            <rect x={434 + i * 345} y="318" width="110" height="10" rx="5" class="f3" />
+            <rect x={434 + i * 345} y="350" width={150 - i * 20} height="34" rx="6" class="f1" />
+            <path
+              d={`M${600 + i * 345} 392 l22 -14 l22 6 l22 -22 l22 8 l22 -18`}
+              class={i === 2 ? 'line-muted' : 'line-accent'}
+            />
+          </g>
+        ))}
+
+        <rect x="410" y="450" width="1010" height="270" rx="10" class="card" />
+        <path d="M450 520H1380M450 580H1380M450 640H1380" class="stroke-soft" />
+        <path d={areaPath} fill={`url(#${uid}-area)`} />
+        <path d={linePath} class="line-accent thick" />
+        <circle cx={chartX(chart.length - 1)} cy={chart[chart.length - 1]} r="7" class="fa" />
+
+        {[0, 1, 2].map((i) => (
+          <g>
+            <path d={`M410 ${770 + i * 38}H1420`} class="stroke-soft" />
+            <rect x="430" y={750 + i * 38} width="160" height="10" rx="5" class="f2" />
+            <rect x="760" y={750 + i * 38} width="110" height="10" rx="5" class="f3" />
+            <rect x="1040" y={750 + i * 38} width="90" height="10" rx="5" class="f3" />
+            <rect x="1310" y={746 + i * 38} width="80" height="18" rx="9" class={i === 0 ? 'fa2' : 'f4'} />
+          </g>
+        ))}
+      </g>
+    )
+  }
+
+  {
+    kind === 'web' && (
+      <g>
+        <rect x="190" y="208" width="110" height="18" rx="5" class="f1" />
+        {[0, 1, 2, 3].map((i) => (
+          <rect x={860 + i * 104} y="212" width="68" height="11" rx="5.5" class="f3" />
+        ))}
+        <rect x="1300" y="198" width="120" height="38" rx="19" class="fa" />
+
+        <rect x="190" y="320" width="620" height="58" rx="8" class="f1" />
+        <rect x="190" y="394" width="300" height="58" rx="8" class="f1" />
+        <rect x="506" y="394" width="230" height="58" rx="29" class="fa" />
+        <rect x="190" y="486" width="460" height="12" rx="6" class="f3" />
+        <rect x="190" y="512" width="420" height="12" rx="6" class="f3" />
+        <rect x="190" y="538" width="290" height="12" rx="6" class="f3" />
+        <rect x="190" y="592" width="170" height="48" rx="24" class="f1" />
+        <rect x="376" y="592" width="150" height="48" rx="24" class="outline" />
+
+        <circle cx="1140" cy="470" r="190" fill={`url(#${uid}-orb)`} />
+        <ellipse cx="1140" cy="470" rx="290" ry="70" class="line-muted" transform="rotate(-18 1140 470)" />
+        <ellipse cx="1140" cy="470" rx="330" ry="86" class="stroke-soft" transform="rotate(-18 1140 470)" />
+
+        {[0, 1, 2].map((i) => (
+          <g>
+            <rect x={190 + i * 420} y="700" width="390" height="140" rx="12" class="card" />
+            <rect x={218 + i * 420} y="728" width="36" height="36" rx="9" class={i === 0 ? 'fa' : 'f4'} />
+            <rect x={218 + i * 420} y="784" width="200" height="12" rx="6" class="f2" />
+            <rect x={218 + i * 420} y="808" width="280" height="10" rx="5" class="f3" />
+          </g>
+        ))}
+      </g>
+    )
+  }
+
+  {
+    kind === 'mobile' && (
+      <g>
+        <rect x="470" y="140" width="300" height="640" rx="46" class="phone" />
+        <rect x="486" y="156" width="268" height="608" rx="34" class="screen" />
+        <rect x="580" y="172" width="80" height="22" rx="11" class="f4" />
+        <rect x="512" y="226" width="140" height="18" rx="6" class="f1" />
+        <rect x="512" y="266" width="216" height="150" rx="18" fill={`url(#${uid}-orb)`} />
+        <rect x="512" y="266" width="216" height="150" rx="18" class="outline" />
+        {[0, 1, 2, 3].map((i) => (
+          <g>
+            <circle cx="530" cy={458 + i * 66} r="17" class={i === 0 ? 'fa' : 'f4'} />
+            <rect x="560" y={448 + i * 66} width={130 - i * 12} height="10" rx="5" class="f2" />
+            <rect x="560" y={466 + i * 66} width="80" height="8" rx="4" class="f3" />
+          </g>
+        ))}
+        <path d="M486 716H754" class="stroke" />
+        {[0, 1, 2, 3].map((i) => (
+          <circle cx={530 + i * 60} cy="740" r="8" class={i === 0 ? 'fa' : 'f3'} />
+        ))}
+
+        <rect x="830" y="230" width="300" height="640" rx="46" class="phone" />
+        <rect x="846" y="246" width="268" height="608" rx="34" class="screen" />
+        <rect x="940" y="262" width="80" height="22" rx="11" class="f4" />
+        <circle cx="980" cy="420" r="82" class="ring-track" />
+        <path d="M980 338 A82 82 0 1 1 905 453" class="ring-value" />
+        <rect x="950" y="408" width="60" height="22" rx="6" class="f1" />
+        {[0, 1, 2].map((i) => (
+          <g>
+            <rect x="872" y={540 + i * 70} width="216" height="54" rx="14" class="card" />
+            <rect x="890" y={556 + i * 70} width={100 + i * 20} height="9" rx="4.5" class="f2" />
+            <rect x="890" y={573 + i * 70} width="60" height="8" rx="4" class="f3" />
+          </g>
+        ))}
+
+        <rect x="1170" y="340" width="270" height="116" rx="18" class="card" />
+        <circle cx="1210" cy="398" r="16" class="fa" />
+        <rect x="1240" y="384" width="160" height="11" rx="5.5" class="f1" />
+        <rect x="1240" y="404" width="110" height="9" rx="4.5" class="f3" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'code' && (
+      <g>
+        <rect x="141" y="173" width="219" height="706" class="f5" />
+        <path d="M360 172V880" class="stroke" />
+        {[0, 1, 1, 2, 2, 1, 0, 1, 1, 0].map((indent, i) => (
+          <rect
+            x={170 + indent * 22}
+            y={204 + i * 36}
+            width={[110, 90, 120, 80, 96, 104, 88, 120, 70, 100][i]}
+            height="10"
+            rx="5"
+            class={i === 3 ? 'fa' : 'f3'}
+          />
+        ))}
+
+        {code.map(([indent, segments], i) => {
+          let x = 452 + indent * 44;
+          return (
+            <g>
+              <rect x="392" y={210 + i * 34} width="20" height="9" rx="3" class="f4" />
+              {segments.map(([w, cls]) => {
+                const rect = <rect x={x} y={208 + i * 34} width={w} height="12" rx="6" class={cls} />;
+                x += w + 14;
+                return rect;
+              })}
+            </g>
+          );
+        })}
+        <rect x="452" y={208 + 6 * 34 - 4} width="3" height="20" class="fa" />
+
+        <rect x="361" y="680" width="1098" height="199" class="term" />
+        <path d="M360 680H1460" class="stroke" />
+        {[0, 1, 2].map((i) => (
+          <g>
+            <path d={`M396 ${722 + i * 40} l10 6 l-10 6`} class="line-accent" />
+            <rect x="424" y={722 + i * 40} width={[260, 380, 180][i]} height="12" rx="6" class={i === 2 ? 'f1' : 'f3'} />
+          </g>
+        ))}
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .mockup {
+    width: 100%;
+    height: 100%;
+  }
+
+  .bg { fill: var(--bg-elev); }
+  .grid-line { fill: none; stroke: rgb(239 236 228 / 0.045); stroke-width: 1; }
+  .stop-accent { stop-color: var(--accent); }
+
+  .win { fill: var(--bg-elev-2); stroke: var(--line-strong); stroke-width: 1.5; }
+  .card { fill: rgb(239 236 228 / 0.03); stroke: var(--line); stroke-width: 1.5; }
+  .phone { fill: var(--bg); stroke: var(--line-strong); stroke-width: 2; }
+  .screen { fill: var(--bg-elev-2); }
+  .term { fill: rgb(0 0 0 / 0.25); }
+
+  .f1 { fill: rgb(239 236 228 / 0.62); }
+  .f2 { fill: rgb(239 236 228 / 0.28); }
+  .f3 { fill: rgb(239 236 228 / 0.13); }
+  .f4 { fill: rgb(239 236 228 / 0.07); }
+  .f5 { fill: rgb(239 236 228 / 0.02); }
+  .fa { fill: var(--accent); }
+  .fa2 { fill: var(--accent-soft); }
+  .outline { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+
+  .stroke { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+  .stroke-soft { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .line-accent { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .line-muted { fill: none; stroke: rgb(239 236 228 / 0.35); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .thick { stroke-width: 4; }
+  .ring-track { fill: none; stroke: rgb(239 236 228 / 0.08); stroke-width: 14; }
+  .ring-value { fill: none; stroke: var(--accent); stroke-width: 14; stroke-linecap: round; }
+</style>

@@ -1,0 +1,70 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { fullName, profile } from '@/data/profile';
+import { withBase } from '@/lib/url';
+
+interface Props {
+  home?: boolean;
+}
+
+const { home = true } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__row">
+      <p>© {year} {fullName}</p>
+      <p class="footer__made">Hecho a mano con Astro y Three.js</p>
+      <a class="link footer__top" href={home ? '#inicio' : withBase()}>
+        {home ? 'Volver arriba' : 'Ir al inicio'}
+        <Icon name="arrow-up" size={14} />
+      </a>
+    </div>
+    <p class="footer__signature" aria-hidden="true">{profile.firstName}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer__top {
+    min-height: 44px;
+    color: var(--fg);
+  }
+
+  /* Firma: el nombre en contorno, cortado por el borde inferior */
+  .footer__signature {
+    margin-bottom: -0.24em;
+    font-size: clamp(6rem, 28vw, 30rem);
+    font-weight: 600;
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 47.99rem) {
+    .footer__made {
+      order: 3;
+      width: 100%;
+    }
+  }
+</style>

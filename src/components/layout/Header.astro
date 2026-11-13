@@ -1,0 +1,442 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { fullName, profile } from '@/data/profile';
+import { sections } from '@/data/navigation';
+import { withBase } from '@/lib/url';
+
+interface Props {
+  /** En la home los enlaces son anclas puras; en otras páginas apuntan a la home. */
+  home?: boolean;
+}
+
+const { home = true } = Astro.props;
+const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+---
+
+<div class="header-sentinel" data-header-sentinel aria-hidden="true"></div>
+
+<header class="header" data-header>
+  <div class="header__inner container">
+    <a class="header__brand" href={home ? '#inicio' : withBase()} aria-label={`${fullName}, ir al inicio`}>
+      <span class="header__mark" aria-hidden="true"></span>
+      <span class="header__name">
+        {profile.firstName}<span class="header__name-rest"> {profile.lastName}</span>
+      </span>
+    </a>
+
+    <nav class="header__nav" aria-label="Principal">
+      <ol>
+        {
+          sections.map((s, i) => (
+            <li>
+              <a href={href(s.id)} data-nav-link={s.id}>
+                <span class="header__idx" aria-hidden="true">
+                  {pad(i)}
+                </span>
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="header__aside">
+      {
+        profile.availability.open && (
+          <p class="header__status mono">
+            <span class="header__dot" aria-hidden="true" />
+            {profile.availability.label}
+          </p>
+        )
+      }
+      <button
+        class="header__menu-btn mono"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="menu"
+        data-menu-open
+      >
+        Menú
+        <Icon name="menu" size={18} />
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog id="menu" class="menu" aria-label="Menú de navegación" data-menu>
+  <div class="menu__top container">
+    <span class="header__name">{profile.firstName}</span>
+    <button class="menu__close mono" type="button" data-menu-close>
+      Cerrar
+      <Icon name="x" size={18} />
+    </button>
+  </div>
+
+  <nav class="menu__nav container" aria-label="Secciones">
+    <ol>
+      {
+        sections.map((s, i) => (
+          <li class="menu__item">
+            <a class="menu__link" href={href(s.id)} data-menu-link>
+              <span class="menu__idx mono" aria-hidden="true">
+                {pad(i)}
+              </span>
+              <span>{s.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <div class="menu__foot container">
+    <a class="link" href={`mailto:${profile.email}`}>{profile.email}</a>
+    <ul class="menu__socials">
+      {
+        profile.socials.map((s) => (
+          <li>
+            <a class="link mono" href={s.href} target="_blank" rel="noopener noreferrer">
+              {s.label}
+              <Icon name="arrow-up-right" size={14} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</dialog>
+
+<script>
+  import { initHeader } from '@/scripts/header';
+  initHeader();
+</script>
+
+<style>
+  .header-sentinel {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 24px;
+    pointer-events: none;
+  }
+
+  .header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: var(--z-header);
+    padding-top: env(safe-area-inset-top);
+    transition:
+      background-color var(--dur-hover) ease,
+      border-color var(--dur-hover) ease;
+    border-bottom: 1px solid transparent;
+  }
+
+  .header[data-scrolled] {
+    background: rgb(14 14 12 / 0.72);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-bottom-color: var(--line);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    height: var(--header-h);
+  }
+
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 44px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  /* Marca: el motivo del hero (núcleo + órbita) en miniatura */
+  .header__mark {
+    position: relative;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--fg) 0 32%, transparent 34%);
+  }
+
+  .header__mark::after {
+    content: '';
+    position: absolute;
+    inset: 22% -12%;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    transform: rotate(-22deg);
+  }
+
+  .header__name-rest {
+    color: var(--fg-muted);
+  }
+
+  .header__nav ol {
+    display: flex;
+    gap: clamp(1rem, 2vw, 2.25rem);
+  }
+
+  .header__nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding-block: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+    transition: color var(--dur-ui) ease;
+  }
+
+  .header__nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.45rem;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .header__nav a[aria-current='true'] {
+    color: var(--fg);
+  }
+
+  .header__nav a[aria-current='true']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+    background: var(--accent);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .header__nav a:hover {
+      color: var(--fg);
+    }
+
+    .header__nav a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  .header__idx {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--fg-faint);
+  }
+
+  .header__aside {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .header__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--fg-muted);
+    font-size: 0.6875rem;
+  }
+
+  .header__dot {
+    position: relative;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Pulso lento: comunica "activo". Solo transform/opacity. */
+  .header__dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.4s var(--ease-out) infinite;
+  }
+
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    to {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+
+  .header__menu-btn,
+  .menu__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    padding-inline: 0.25rem;
+    color: var(--fg);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 63.99rem) {
+    .header__nav,
+    .header__status {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .header__menu-btn {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) and (max-width: 82rem) {
+    .header__status {
+      display: none;
+    }
+  }
+
+  /* ── Menú móvil (dialog nativo: foco atrapado, Esc y fondo inerte gratis) ── */
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    border: 0;
+    background: var(--bg);
+    color: var(--fg);
+    flex-direction: column;
+    opacity: 0;
+    transition:
+      opacity var(--dur-ui) var(--ease-out),
+      display var(--dur-ui) allow-discrete,
+      overlay var(--dur-ui) allow-discrete;
+  }
+
+  .menu[open] {
+    display: flex;
+    opacity: 1;
+  }
+
+  @starting-style {
+    .menu[open] {
+      opacity: 0;
+    }
+  }
+
+  .menu::backdrop {
+    background: transparent;
+  }
+
+  .menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-h);
+    font-weight: 500;
+  }
+
+  .menu__nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .menu__nav ol {
+    width: 100%;
+  }
+
+  .menu__item {
+    border-top: 1px solid var(--line);
+  }
+
+  .menu__item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .menu__link {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 0.9rem;
+    font-size: clamp(2rem, 9vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .menu__idx {
+    width: 2rem;
+    color: var(--fg-faint);
+  }
+
+  /* Entrada escalonada de los enlaces (40 ms) */
+  .menu__link {
+    transform: translateY(14px);
+    opacity: 0;
+    transition:
+      transform 420ms var(--ease-out),
+      opacity 420ms var(--ease-out);
+  }
+
+  .menu[open] .menu__link {
+    transform: none;
+    opacity: 1;
+  }
+
+  @starting-style {
+    .menu[open] .menu__link {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+  }
+
+  .menu__item:nth-child(2) .menu__link { transition-delay: 40ms; }
+  .menu__item:nth-child(3) .menu__link { transition-delay: 80ms; }
+  .menu__item:nth-child(4) .menu__link { transition-delay: 120ms; }
+  .menu__item:nth-child(5) .menu__link { transition-delay: 160ms; }
+
+  .menu__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-block: 1.5rem 2rem;
+    color: var(--fg-muted);
+  }
+
+  .menu__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .menu__socials a {
+    min-height: 44px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header__dot::after {
+      animation: none;
+    }
+
+    .menu__link,
+    .menu[open] .menu__link {
+      transform: none;
+    }
+  }
+</style>

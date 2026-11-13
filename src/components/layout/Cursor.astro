@@ -1,0 +1,49 @@
+---
+/**
+ * Etiqueta contextual que sigue al puntero sobre elementos con [data-cursor].
+ * No oculta el cursor nativo: solo añade información ("Ver demo", "Ver código").
+ * Se activa únicamente con ratón/trackpad y sin movimiento reducido.
+ */
+---
+
+<div class="cursor" data-cursor-root aria-hidden="true">
+  <span class="cursor__label mono" data-cursor-label></span>
+</div>
+
+<script>
+  import { initCursor } from '@/scripts/cursor';
+  initCursor();
+</script>
+
+<style>
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-cursor);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .cursor__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-pill);
+    background: var(--fg);
+    color: var(--bg);
+    white-space: nowrap;
+    transform: translate(18px, 18px) scale(0.92);
+    transform-origin: top left;
+    opacity: 0;
+    transition:
+      opacity var(--dur-ui) var(--ease-out),
+      transform var(--dur-ui) var(--ease-out);
+  }
+
+  .cursor[data-visible] .cursor__label {
+    opacity: 1;
+    transform: translate(18px, 18px) scale(1);
+  }
+</style>

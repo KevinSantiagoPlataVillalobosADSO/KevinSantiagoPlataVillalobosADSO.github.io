@@ -1,0 +1,22 @@
+# build
+dist/
+.astro/
+
+# dependencias
+node_modules/
+
+# logs y entorno
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# CV original con datos personales (teléfono, dirección…): no debe subirse al repo público.
+# La versión que se publica va en public/cv.pdf.
+src/assets/*.pdf
+
+# sistema
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
