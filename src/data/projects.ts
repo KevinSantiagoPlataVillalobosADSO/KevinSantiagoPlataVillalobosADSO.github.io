@@ -1,18 +1,20 @@
 /**
  * ─────────────────────────────────────────────────────────────
- *  PROYECTOS — los cuatro de abajo son EJEMPLOS (placeholder: true).
- *  Reemplázalos por tus proyectos reales y elimina `placeholder`.
+ *  PROYECTOS — se muestran en este orden.
  *
- *  Para usar una captura real:
- *    1. Guarda la imagen en src/assets/projects/ (JPG/PNG, ~2000 px de ancho, 16:10).
- *    2. Impórtala arriba:   import capturaAlfa from '@/assets/projects/alfa.jpg';
- *    3. Úsala en el proyecto: image: capturaAlfa, imageAlt: 'Qué se ve en la captura'
+ *  Para añadir uno:
+ *    1. Guarda la captura en src/assets/projects/ (JPG/PNG, ~2000 px de ancho, 16:10).
+ *    2. Impórtala arriba:   import captura from '@/assets/projects/nombre.jpg';
+ *    3. Úsala en el proyecto: image: captura, imageAlt: 'Qué se ve en la captura'
  *  Astro la optimiza en el build (AVIF/WebP, varios tamaños, lazy loading).
  *
- *  Mientras no haya imagen se muestra una maqueta abstracta (`mockup`).
+ *  Sin imagen se muestra una maqueta abstracta (`mockup`).
+ *  `placeholder: true` añade la etiqueta "Contenido de ejemplo".
  * ─────────────────────────────────────────────────────────────
  */
 import type { ImageMetadata } from 'astro';
+import voidworm from '@/assets/projects/voidworm.jpg';
+import iaGenerativa from '@/assets/projects/ia-generativa.jpg';
 
 export type MockupKind = 'dashboard' | 'web' | 'mobile' | 'code';
 
@@ -27,55 +29,36 @@ export interface Project {
   image?: ImageMetadata;
   imageAlt?: string;
   mockup?: MockupKind;
-  /** Muestra la etiqueta "Contenido de ejemplo". Quítalo al poner datos reales. */
+  /** Muestra la etiqueta "Contenido de ejemplo". */
   placeholder?: boolean;
 }
 
+const github = 'https://github.com/KevinSantiagoPlataVillalobosADSO';
+const pages = 'https://kevinsantiagoplatavillalobosadso.github.io';
+
 export const projects: Project[] = [
   {
-    title: 'Proyecto Alfa',
+    title: 'VoidWorm',
     summary:
-      'Describe aquí qué problema resuelve el proyecto, para quién lo construiste y qué lo hace interesante a nivel técnico. Dos o tres líneas bastan.',
-    year: '20XX',
-    role: 'Full stack',
-    tags: ['Laravel', 'Vue.js', 'MySQL'],
-    repo: 'https://github.com/tu-usuario/proyecto-alfa',
-    demo: 'https://tu-usuario.github.io/proyecto-alfa',
-    mockup: 'dashboard',
-    placeholder: true,
+      'Videojuego arcade ambientado en el espacio: un gusano de energía devora todo lo que encuentra para superar cinco niveles mientras tres jefes lo persiguen. Hecho con JavaScript puro, sin motores ni dependencias: el fondo, los objetos, los jefes y los sonidos se generan por código. Se juega con teclado o en pantallas táctiles, e incluye una bitácora con las decisiones técnicas.',
+    year: '2026',
+    role: 'Concepto y desarrollo',
+    tags: ['JavaScript', 'Canvas', 'HTML5', 'CSS3'],
+    repo: `${github}/VOIDWORMJS`,
+    demo: `${pages}/VOIDWORMJS/`,
+    image: voidworm,
+    imageAlt: 'Partida de VoidWorm: un gusano luminoso avanza entre esferas de energía sobre un fondo espacial.',
   },
   {
-    title: 'Proyecto Beta',
+    title: '¿Qué es la IA generativa?',
     summary:
-      'Un buen resumen menciona el contexto, tu papel y el resultado. Evita listar tecnologías aquí: ya aparecen debajo.',
-    year: '20XX',
-    role: 'Backend',
-    tags: ['PHP', 'APIs REST', 'JavaScript'],
-    repo: 'https://github.com/tu-usuario/proyecto-beta',
-    mockup: 'web',
-    placeholder: true,
-  },
-  {
-    title: 'Proyecto Gamma',
-    summary:
-      'Si el proyecto tiene demo pública, enlázala. Si es privado, explica el reto y muestra una captura sin datos sensibles.',
-    year: '20XX',
+      'Página divulgativa que explica la IA generativa en tres pasos, con ejemplos, riesgos y recursos. Su parte central es una mini-IA interactiva: colocas puntos de dos clases, la entrenas y ves en vivo cómo el modelo ajusta sus parámetros para separarlos.',
+    year: '2026',
     role: 'Frontend',
-    tags: ['React', 'APIs REST'],
-    repo: 'https://github.com/tu-usuario/proyecto-gamma',
-    demo: 'https://tu-usuario.github.io/proyecto-gamma',
-    mockup: 'mobile',
-    placeholder: true,
-  },
-  {
-    title: 'Proyecto Delta',
-    summary:
-      'Para proyectos sin demo, el enlace al repositorio y un README claro hacen el trabajo. Cuenta qué aprendiste.',
-    year: '20XX',
-    role: 'Datos',
-    tags: ['SQL', 'Informix'],
-    repo: 'https://github.com/tu-usuario/proyecto-delta',
-    mockup: 'code',
-    placeholder: true,
+    tags: ['HTML5', 'CSS3', 'JavaScript', 'Canvas'],
+    repo: `${github}/ia-generativa-mockup`,
+    demo: `${pages}/ia-generativa-mockup/`,
+    image: iaGenerativa,
+    imageAlt: 'Portada de la página: el titular «Una máquina que aprende a crear, no solo a responder» junto a una ilustración de líneas que convergen.',
   },
 ];

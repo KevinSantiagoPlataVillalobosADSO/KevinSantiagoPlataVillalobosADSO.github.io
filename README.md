@@ -38,7 +38,7 @@ Busca `PENDIENTE` en `src/data/` y reemplaza:
 - [x] Apellido, ubicación, correo y enlaces de redes
 - [x] Textos del hero y de "Sobre mí" (redactados con tus datos: revísalos)
 - [x] Disponibilidad (`availability.open`)
-- [ ] Proyectos reales (y quita `placeholder: true`)
+- [x] Proyectos reales (VoidWorm e IA generativa; añade más en `src/data/projects.ts`)
 - [x] Experiencia y formación
 - [ ] Retrato en `src/assets/retrato.jpg` (opcional)
 - [ ] CV para la web en `public/cv.pdf` (sin teléfono, dirección ni fecha de nacimiento)
